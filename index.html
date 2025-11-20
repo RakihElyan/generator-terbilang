@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konversi Angka ke Terbilang (Fixed)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .result-box {
+            background-color: #f1f3f5;
+            border-left: 5px solid #11998e;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            min-height: 60px;
+        }
+        .text-result {
+            font-weight: 600;
+            color: #212529;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            text-transform: capitalize; /* Agar huruf depan tiap kata kapital */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card p-4">
+                    <h3 class="text-center mb-4 fw-bold text-success">Generator Terbilang</h3>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Masukkan Jumlah Uang:</label>
+                        <input type="number" class="form-control form-control-lg" id="inputAngka" placeholder="0" oninput="prosesKonversi()">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Format Rupiah:</span>
+                        <span id="outputRupiah" class="fw-bold fs-5">Rp 0</span>
+                    </div>
+
+                    <div class="result-box">
+                        <span id="outputKata" class="text-result">Nol Rupiah</span>
+                    </div>
+
+                    <button class="btn btn-success mt-3 w-100" onclick="copyText()">Salin Teks</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function prosesKonversi() {
+            const input = document.getElementById('inputAngka').value;
+            const displayRupiah = document.getElementById('outputRupiah');
+            const displayKata = document.getElementById('outputKata');
+
+            if (!input) {
+                displayRupiah.innerText = 'Rp 0';
+                displayKata.innerText = 'Nol Rupiah';
+                return;
+            }
+
+            let angka = parseFloat(input);
+            
+            // Batasi input agar tidak crash browser (Max 15 digit aman di JS)
+            if (input.length > 15) {
+                displayKata.innerText = "Angka terlalu besar (Maksimal 15 digit)";
+                return;
+            }
+
+            displayRupiah.innerText = formatRupiah(angka);
+            
+            // Proses terbilang dan tambahkan "Rupiah"
+            let teks = terbilang(angka);
+            
+            // Hapus spasi ganda yang mungkin muncul akibat rekursi
+            teks = teks.replace(/\s+/g, ' ').trim(); 
+            
+            displayKata.innerText = teks + " Rupiah";
+        }
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
+        // LOGIKA UTAMA (DIPERBAIKI SPASINYA)
+        function terbilang(nilai) {
+            nilai = Math.floor(Math.abs(nilai));
+            
+            const huruf = [
+                "", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"
+            ];
+            
+            let temp = "";
+
+            if (nilai < 12) {
+                temp = " " + huruf[nilai];
+            } 
+            else if (nilai < 20) {
+                temp = terbilang(nilai - 10) + " Belas";
+            } 
+            else if (nilai < 100) {
+                temp = terbilang(nilai / 10) + " Puluh " + terbilang(nilai % 10);
+            } 
+            else if (nilai < 200) {
+                temp = " Seratus " + terbilang(nilai - 100);
+            } 
+            else if (nilai < 1000) {
+                temp = terbilang(nilai / 100) + " Ratus " + terbilang(nilai % 100);
+            } 
+            else if (nilai < 2000) {
+                temp = " Seribu " + terbilang(nilai - 1000);
+            } 
+            else if (nilai < 1000000) {
+                temp = terbilang(nilai / 1000) + " Ribu " + terbilang(nilai % 1000);
+            } 
+            else if (nilai < 1000000000) {
+                temp = terbilang(nilai / 1000000) + " Juta " + terbilang(nilai % 1000000);
+            } 
+            else if (nilai < 1000000000000) {
+                temp = terbilang(nilai / 1000000000) + " Milyar " + terbilang(nilai % 1000000000);
+            } 
+            else if (nilai < 1000000000000000) {
+                temp = terbilang(nilai / 1000000000000) + " Triliun " + terbilang(nilai % 1000000000000);
+            }
+
+            return temp;
+        }
+
+        function copyText() {
+            const text = document.getElementById('outputKata').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Teks tersalin!");
+            });
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
